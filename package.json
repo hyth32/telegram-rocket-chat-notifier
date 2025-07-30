@@ -1,0 +1,30 @@
+{
+  "name": "telegram-rocket-chat-notifier",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hyth32/telegram-rocket-chat-notifier"
+  },
+  "keywords": [
+    "Telegram",
+    "RocketChat"
+  ],
+  "author": "hyth32",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/hyth32/telegram-rocket-chat-notifier/issues"
+  },
+  "homepage": "https://github.com/hyth32/telegram-rocket-chat-notifier#readme",
+  "dependencies": {
+    "axios": "^1.11.0",
+    "dotenv": "^17.2.1",
+    "express": "^5.1.0",
+    "node-telegram-bot-api": "^0.66.0"
+  }
+}
