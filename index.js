@@ -1,59 +1,19 @@
 import { configDotenv } from 'dotenv'
-import express from 'express';
-import bodyParser from 'body-parser'
-import TelegramBot from 'node-telegram-bot-api'
-import { Auth } from './Auth.js'
+import { Telegraf, Scenes, session } from 'telegraf'
+import { loginWizard } from './scenes/loginScene.js'
 
 configDotenv()
 
-const app = express()
-app.use(bodyParser.json())
+const stage = new Scenes.Stage([loginWizard])
+const bot = new Telegraf(process.env.BOT_TOKEN)
 
-const bot = new TelegramBot(process.env.BOT_TOKEN, { polling: true })
+bot.use(session())
+bot.use(stage.middleware())
 
-let chatId = null
-const userStates = {}
+bot.start(ctx => ctx.scene.enter('login-wizard'))
 
-bot.onText(/\/start/, (msg) => {
-    chatId = msg.chat.id
-    bot.sendMessage(chatId, 'Привет! Введи домен Rocket Chat')
-    userStates[chatId] = { step: 'awaiting_url' }
-})
+bot.launch()
+console.log('Bot is running');
 
-bot.on('message', async (msg) => {
-    chatId = msg.chat.id
-    const state = userStates[chatId]
-
-    if (!state) return
-
-    if (state.step == 'awaiting_url') {
-        state.url = msg.text.trim()
-        state.step = 'awaiting_username'
-        bot.sendMessage(chatId, 'Username')
-    } 
-
-    else if (state.step == 'awaiting_username') {
-        state.username = msg.text.trim()
-        state.step = 'awaiting_password'
-        bot.sendMessage(chatId, 'Password')
-    }
-
-    else if (state.step == 'awaiting_password') {
-        state.password = msg.text.trim()
-
-        try {
-            const auth = new Auth(state.url)
-            const loginResponse = await auth.login(state.username, state.password)
-            bot.sendMessage(chatId, loginResponse.join('\n'))
-        } catch (error) {
-            console.error(error);
-        }
-
-        delete userStates[chatId]
-    }
-})
-
-const port = process.env.PORT
-app.listen(port, () => {
-    console.log(`Server is running on: http://localhost:${port}`)
-})
+process.once('SIGINT', () => bot.stop('SIGINT'));
+process.once('SIGTERM', () => bot.stop('SIGTERM'))
