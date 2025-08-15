@@ -21,6 +21,25 @@ export const login = async (baseUrl, username, password) => {
         return { name, userId, authToken }
     } else {
         console.error(response)
-        throw new Error(`Ошибка входа: ${response.status}`)
+        throw new Error(response.status)
+    }
+}
+
+export const getJoinedChannels = async (baseUrl, authToken, userId) => {
+    const joinedChannelsUrl = prepareBaseUrl(baseUrl) + '/channels.list.joined'
+
+    const response = await axios.get(joinedChannelsUrl, {
+        headers: {
+            'X-Auth-Token': authToken,
+            'X-User-Id': userId,
+        }
+    })
+
+    if (response.status == 200) {
+        const channels = response.data.channels
+        return channels.map((channel) => ({ id: channel._id, name: channel.fname }))
+    } else {
+        console.log(response)
+        throw new Error(response.status)
     }
 }

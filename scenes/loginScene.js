@@ -1,4 +1,4 @@
-import { Scenes } from 'telegraf'
+import { Markup, Scenes } from 'telegraf'
 import { login } from '../services/rocketChatApi.js'
 
 export const loginWizard = new Scenes.WizardScene(
@@ -30,7 +30,16 @@ export const loginWizard = new Scenes.WizardScene(
 
         try {
             const { name, userId, authToken } = await login(url, username, password)
+
+            ctx.session.rocketChat = { url, userId, authToken }
+
             ctx.reply(`Авторизация успешна!\nИмя: ${name}\nUserId: ${userId}\nToken: ${authToken}`)
+            ctx.reply(
+                'Выберите действие',
+                Markup.inlineKeyboard([
+                    Markup.button.callback('Channels', 'get_channels')
+                ]),
+            )
         } catch (error) {
             ctx.reply(`Ошибка авторизации: ${error.message}`)
         }
